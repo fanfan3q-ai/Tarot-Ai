@@ -40,77 +40,70 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Custom Tarot Theme Colors */
+  --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-dark: var(--gold-dark);
+  --color-midnight: var(--midnight);
+  --color-midnight-light: var(--midnight-light);
+  --color-midnight-deep: var(--midnight-deep);
+
+  /* Custom Fonts */
+  --font-cinzel: "Cinzel Decorative", serif;
+  --font-serif-tc: "Noto Serif TC", serif;
+  --font-sans-tc: "Noto Sans TC", sans-serif;
 }
 
+/* ─── Dark Theme (Default for Tarot App) ─── */
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.235 0.015 65);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.015 65);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.015 65);
-  --secondary: oklch(0.98 0.001 286.375);
-  --secondary-foreground: oklch(0.4 0.015 65);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
+  /* Tarot custom palette */
+  --gold: oklch(0.72 0.14 75);           /* #c8952a champagne gold */
+  --gold-light: oklch(0.82 0.12 75);     /* lighter gold for hover */
+  --gold-dark: oklch(0.62 0.14 75);      /* darker gold for borders */
+  --midnight: oklch(0.13 0.03 260);      /* #070d1e midnight blue */
+  --midnight-light: oklch(0.18 0.03 260); /* slightly lighter midnight */
+  --midnight-deep: oklch(0.08 0.03 260); /* deeper midnight */
+
+  /* shadcn/ui semantic tokens — dark theme */
+  --radius: 0.75rem;
+  --background: oklch(0.13 0.03 260);          /* midnight blue */
+  --foreground: oklch(0.92 0.01 80);           /* warm off-white */
+  --card: oklch(0.16 0.03 260);                /* slightly lighter than bg */
+  --card-foreground: oklch(0.92 0.01 80);
+  --popover: oklch(0.16 0.03 260);
+  --popover-foreground: oklch(0.92 0.01 80);
+  --primary: oklch(0.72 0.14 75);              /* champagne gold */
+  --primary-foreground: oklch(0.13 0.03 260);  /* midnight on gold */
+  --secondary: oklch(0.20 0.03 260);
+  --secondary-foreground: oklch(0.82 0.04 80);
+  --muted: oklch(0.22 0.02 260);
+  --muted-foreground: oklch(0.65 0.03 260);
+  --accent: oklch(0.20 0.04 260);
+  --accent-foreground: oklch(0.72 0.14 75);    /* gold accent text */
+  --destructive: oklch(0.60 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.25 0.03 260);
+  --input: oklch(0.22 0.03 260);
+  --ring: oklch(0.72 0.14 75);                 /* gold ring */
+  --chart-1: oklch(0.72 0.14 75);
+  --chart-2: oklch(0.55 0.20 280);
+  --chart-3: oklch(0.65 0.15 200);
+  --chart-4: oklch(0.60 0.18 320);
+  --chart-5: oklch(0.50 0.12 260);
+  --sidebar: oklch(0.10 0.03 260);
+  --sidebar-foreground: oklch(0.85 0.01 80);
+  --sidebar-primary: oklch(0.72 0.14 75);
+  --sidebar-primary-foreground: oklch(0.13 0.03 260);
+  --sidebar-accent: oklch(0.18 0.03 260);
+  --sidebar-accent-foreground: oklch(0.72 0.14 75);
+  --sidebar-border: oklch(0.25 0.03 260);
+  --sidebar-ring: oklch(0.72 0.14 75);
 }
 
+/* Light theme override (not primary, but available) */
 .dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.85 0.005 65);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.85 0.005 65);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.85 0.005 65);
-  --secondary: oklch(0.24 0.006 286.033);
-  --secondary-foreground: oklch(0.7 0.005 65);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground:  oklch(0.92 0.005 65);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
+  /* Same as root since our default IS dark */
 }
 
 @layer base {
@@ -119,6 +112,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Noto Sans TC", "Noto Serif TC", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -131,27 +127,29 @@
   input[type="radio"]:not(:disabled) {
     @apply cursor-pointer;
   }
+
+  /* Scrollbar styling for dark theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: oklch(0.13 0.03 260);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.30 0.03 260);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.40 0.03 260);
+  }
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
+    padding-left: 1rem;
     padding-right: 1rem;
   }
 
@@ -162,16 +160,141 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1280px;
     }
+  }
+
+  /* ─── Tarot Custom Components ─── */
+
+  /* Gold gradient text */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, oklch(0.72 0.14 75), oklch(0.85 0.10 75), oklch(0.72 0.14 75));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Gold border glow */
+  .border-gold-glow {
+    border: 1px solid oklch(0.72 0.14 75 / 40%);
+    box-shadow: 0 0 15px oklch(0.72 0.14 75 / 15%), inset 0 0 15px oklch(0.72 0.14 75 / 5%);
+  }
+
+  /* Card glass effect */
+  .glass-card {
+    background: oklch(0.16 0.03 260 / 80%);
+    backdrop-filter: blur(12px);
+    border: 1px solid oklch(0.72 0.14 75 / 20%);
+  }
+
+  /* Soul gift quote box */
+  .soul-gift-box {
+    background: linear-gradient(135deg, oklch(0.72 0.14 75 / 10%), oklch(0.72 0.14 75 / 5%));
+    border-left: 3px solid oklch(0.72 0.14 75);
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+
+  /* Paywall blur overlay */
+  .paywall-blur {
+    position: relative;
+    overflow: hidden;
+  }
+  .paywall-blur::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60%;
+    background: linear-gradient(transparent, oklch(0.13 0.03 260));
+    pointer-events: none;
+  }
+
+  /* Cinzel heading */
+  .font-cinzel {
+    font-family: "Cinzel Decorative", serif;
+  }
+
+  /* Serif TC body */
+  .font-serif-tc {
+    font-family: "Noto Serif TC", serif;
+  }
+
+  /* Sans TC body */
+  .font-sans-tc {
+    font-family: "Noto Sans TC", sans-serif;
+  }
+
+  /* Particle canvas container */
+  .particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Section with proper z-index above particles */
+  .content-section {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@layer utilities {
+  /* Shimmer animation for loading states */
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(
+      90deg,
+      oklch(0.72 0.14 75 / 0%) 0%,
+      oklch(0.72 0.14 75 / 20%) 50%,
+      oklch(0.72 0.14 75 / 0%) 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Fade in up animation */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Glow pulse for CTA */
+  .animate-glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 5px oklch(0.72 0.14 75 / 30%); }
+    50% { box-shadow: 0 0 20px oklch(0.72 0.14 75 / 60%), 0 0 40px oklch(0.72 0.14 75 / 20%); }
   }
 }

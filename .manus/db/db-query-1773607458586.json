@@ -1,0 +1,19 @@
+{
+  "query": "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE();",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3DsrfdyMuvvqWnW.root --database GQwBG8fiP4oAiu26TsKsdW --execute SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE();",
+  "rows": [
+    {
+      "TABLE_NAME": "users"
+    },
+    {
+      "TABLE_NAME": "points_log"
+    },
+    {
+      "TABLE_NAME": "__drizzle_migrations"
+    }
+  ],
+  "messages": [],
+  "stdout": "TABLE_NAME\nusers\npoints_log\n__drizzle_migrations\n",
+  "stderr": "",
+  "execution_time_ms": 1591
+}
