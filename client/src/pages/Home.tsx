@@ -3,6 +3,8 @@ import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Star } from "lucide-react";
 import StarfieldBackground from "@/components/StarfieldBackground";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import CardRevealAnimation from "@/components/CardRevealAnimation";
 import { getCardImageUrl } from "@shared/tarotImages";
 import { calculateNumerology } from "@shared/numerology";
@@ -204,9 +206,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
       <StarfieldBackground />
+      <Header />
 
       {/* Hero Section */}
-      <section className="content-section min-h-screen flex flex-col items-center justify-center px-4 py-8 sm:py-12">
+      <section className="content-section min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-8 sm:pt-24 sm:pb-12">
         <div ref={heroRef} className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/30 bg-gold/5 mb-6">
@@ -234,39 +237,49 @@ export default function Home() {
           >
             二十二道靈數密碼
           </h1>
-          <p className="font-serif-tc text-base sm:text-lg md:text-xl text-foreground/70 leading-relaxed mb-2">
-            你的生日，藏著宇宙給你的密碼
+          {/* Poetic subtitle */}
+          <p className="text-[1.1rem] italic mb-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
+            每一張牌都是靈魂的鏡像
+          </p>
+          <p className="text-[1.1rem] italic mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
+            每一個數字都蘊含宇宙的智慧
           </p>
 
           {/* Mystical symbol decoration row */}
-          <p className="text-[0.7rem] tracking-[0.2em] text-gold/40 mb-2">
+          <p className="text-[0.7rem] tracking-[0.2em] text-gold/40">
             ✦ 古羅馬神祕學 ✦ 盧恩符文 ✦ 塔羅原型 ✦
           </p>
 
-          <p className="text-sm text-muted-foreground">
-            輸入生日，解讀你的主命數、行為數、特質數與 2026 流年運勢
-          </p>
-
-          {/* Poetic Three Lines */}
-          <div className="mt-8 max-w-md mx-auto">
+          {/* Poetic Three Lines — CSS grid aligned */}
+          <div className="mt-8 max-w-sm mx-auto">
             <p className="text-center text-gold/30 tracking-[0.3em] text-xs">──── ✦ ✦ ✦ ────</p>
-            <div className="py-4 text-center" style={{ lineHeight: "2.2" }}>
-              <p className="text-[1.1rem] italic" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
-                <span className="text-gold">&#9789;</span> 潛意識　　你的深層渴望
-              </p>
-              <p className="text-[1.1rem] italic" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
-                <span className="text-gold">◈</span> 行為模式　外在如何展現
-              </p>
-              <p className="text-[1.1rem] italic" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
-                <span className="text-gold">✦</span> 靈魂特質　星座的贈禮
-              </p>
+            <div
+              className="py-4 mx-auto"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 1fr",
+                columnGap: "0.75rem",
+                rowGap: "0.6rem",
+                maxWidth: "280px",
+                fontFamily: "'Cormorant Garamond', serif",
+                fontStyle: "italic",
+                fontSize: "1.1rem",
+                color: "#b8c8e8",
+              }}
+            >
+              <span className="text-gold text-right">&#9789;</span>
+              <span>潛意識　你的深層渴望</span>
+              <span className="text-gold text-right">◈</span>
+              <span>行為模式　外在如何展現</span>
+              <span className="text-gold text-right">✦</span>
+              <span>靈魂特質　星座的贈禮</span>
             </div>
             <p className="text-center text-gold/30 tracking-[0.3em] text-xs">──── ✦ ✦ ✦ ────</p>
           </div>
         </div>
 
         {/* Birthday Input Form */}
-        <div ref={formRef} className="w-full max-w-md mx-auto">
+        <div id="birthday-form" ref={formRef} className="w-full max-w-md mx-auto">
           <div className="glass-card rounded-2xl p-5 sm:p-8">
             <h2 className="font-serif-tc text-lg sm:text-xl text-center text-foreground/90 mb-6">
               輸入你的西元生日
@@ -391,11 +404,13 @@ export default function Home() {
         </div>
 
         {/* Trust Indicators */}
-        <div className="mt-6 sm:mt-8 text-center text-xs text-muted-foreground/60 space-y-1">
+        <div id="course-cta" className="mt-6 sm:mt-8 text-center text-xs text-muted-foreground/60 space-y-1">
           <p>基於陳彩綺塔羅靈數系統 · 21 張大阿爾克那完整解析</p>
           <p>你的資料僅用於計算，不會被儲存或分享</p>
         </div>
       </section>
+
+      <Footer />
 
       {/* Card Reveal Animation Overlay */}
       {showReveal && revealData && (
