@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Eye, Lock } from "lucide-react";
+import { Sparkles, Star } from "lucide-react";
 import StarfieldBackground from "@/components/StarfieldBackground";
 import CardRevealAnimation from "@/components/CardRevealAnimation";
 import { getCardImageUrl } from "@shared/tarotImages";
@@ -216,34 +216,52 @@ export default function Home() {
             </span>
           </div>
 
-          {/* Title */}
-          <h1 className="font-cinzel text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gold-gradient leading-tight mb-4">
+          {/* Subtitle above title */}
+          <p className="font-cinzel text-[0.75rem] tracking-[0.3em] text-gold/50 mb-3">
+            ARCANA MYSTICAL JOURNEY
+          </p>
+
+          {/* Title — enhanced with glow */}
+          <h1
+            className="font-cinzel text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4"
+            style={{
+              background: "linear-gradient(135deg, #f5d98a, #c8952a)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              textShadow: "0 0 30px rgba(200,149,42,0.5)",
+            }}
+          >
             二十二道靈數密碼
           </h1>
           <p className="font-serif-tc text-base sm:text-lg md:text-xl text-foreground/70 leading-relaxed mb-2">
             你的生日，藏著宇宙給你的密碼
           </p>
+
+          {/* Mystical symbol decoration row */}
+          <p className="text-[0.7rem] tracking-[0.2em] text-gold/40 mb-2">
+            ✦ 古羅馬神祕學 ✦ 盧恩符文 ✦ 塔羅原型 ✦
+          </p>
+
           <p className="text-sm text-muted-foreground">
             輸入生日，解讀你的主命數、行為數、特質數與 2026 流年運勢
           </p>
 
-          {/* Three Layer Icons */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 mt-8 max-w-md mx-auto">
-            <div className="flex flex-col items-center gap-2 p-3 rounded-xl glass-card">
-              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-gold" />
-              <span className="text-xs sm:text-sm text-foreground/80 font-sans-tc">天賦本質</span>
-              <span className="text-[10px] sm:text-xs text-gold/60">免費開放</span>
+          {/* Poetic Three Lines */}
+          <div className="mt-8 max-w-md mx-auto">
+            <p className="text-center text-gold/30 tracking-[0.3em] text-xs">──── ✦ ✦ ✦ ────</p>
+            <div className="py-4 text-center" style={{ lineHeight: "2.2" }}>
+              <p className="text-[1.1rem] italic" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
+                <span className="text-gold">&#9789;</span> 潛意識　　你的深層渴望
+              </p>
+              <p className="text-[1.1rem] italic" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
+                <span className="text-gold">◈</span> 行為模式　外在如何展現
+              </p>
+              <p className="text-[1.1rem] italic" style={{ fontFamily: "'Cormorant Garamond', serif", color: "#b8c8e8" }}>
+                <span className="text-gold">✦</span> 靈魂特質　星座的贈禮
+              </p>
             </div>
-            <div className="flex flex-col items-center gap-2 p-3 rounded-xl glass-card">
-              <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-gold" />
-              <span className="text-xs sm:text-sm text-foreground/80 font-sans-tc">意識層解析</span>
-              <span className="text-[10px] sm:text-xs text-gold/60">免費開放</span>
-            </div>
-            <div className="flex flex-col items-center gap-2 p-3 rounded-xl glass-card">
-              <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-gold/50" />
-              <span className="text-xs sm:text-sm text-foreground/80 font-sans-tc">潛意識密碼</span>
-              <span className="text-[10px] sm:text-xs text-gold/60">積分解鎖</span>
-            </div>
+            <p className="text-center text-gold/30 tracking-[0.3em] text-xs">──── ✦ ✦ ✦ ────</p>
           </div>
         </div>
 

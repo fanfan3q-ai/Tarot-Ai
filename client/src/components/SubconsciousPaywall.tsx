@@ -4,7 +4,7 @@
  */
 
 import { useState } from "react";
-import { Lock, Sparkles, Share2, Calendar, Users, Gift } from "lucide-react";
+import { Lock, Sparkles, Share2, Calendar, Users, Gift, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePoints } from "@/hooks/usePoints";
 
@@ -67,7 +67,7 @@ export default function SubconsciousPaywall({
           潛意識密碼
         </h3>
         <p className="text-sm text-foreground/60 font-sans-tc mb-4">
-          解鎖你靈魂深處的秘密
+          完成計算即獲得 30 積分，再分享一次就能解鎖
         </p>
 
         {/* Progress bar */}
@@ -129,15 +129,17 @@ export default function SubconsciousPaywall({
         {/* Earn guide */}
         {showEarnGuide && !canUnlock && (
           <div className="mt-5 text-left max-w-sm mx-auto space-y-3">
-            <div className="flex items-center gap-3 text-sm">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border border-gold/20"
-                style={{ background: "oklch(0.72 0.14 75 / 10%)" }}
+            {/* First-calc bonus — highlighted */}
+            <div className="flex items-center gap-3 text-sm p-2 rounded-lg" style={{ background: "oklch(0.72 0.14 75 / 8%)" }}>
+              <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border border-gold/40"
+                style={{ background: "oklch(0.72 0.14 75 / 15%)" }}
               >
-                <Calendar className="w-4 h-4 text-gold/70" />
+                <Star className="w-4 h-4 text-gold" />
               </div>
-              <div>
-                <span className="text-foreground/80 font-sans-tc">每日簽到</span>
-                <span className="text-gold/60 text-xs ml-2">+5 積分</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-gold font-bold font-sans-tc">✦ 首次完成計算</span>
+                <span className="text-gold font-bold text-sm">+30 積分</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full border border-gold/30 text-gold/70 font-sans-tc">限一次</span>
               </div>
             </div>
             <div className="flex items-center gap-3 text-sm">
@@ -160,6 +162,17 @@ export default function SubconsciousPaywall({
               <div>
                 <span className="text-foreground/80 font-sans-tc">邀請好友完成計算</span>
                 <span className="text-gold/60 text-xs ml-2">+20 積分</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-sm">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border border-gold/20"
+                style={{ background: "oklch(0.72 0.14 75 / 10%)" }}
+              >
+                <Calendar className="w-4 h-4 text-gold/70" />
+              </div>
+              <div>
+                <span className="text-foreground/80 font-sans-tc">每日簽到</span>
+                <span className="text-gold/60 text-xs ml-2">+5 積分</span>
               </div>
             </div>
           </div>
