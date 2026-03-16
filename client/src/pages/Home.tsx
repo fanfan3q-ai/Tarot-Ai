@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Star, Eye, Lock } from "lucide-react";
 import StarfieldBackground from "@/components/StarfieldBackground";
@@ -7,6 +7,7 @@ import CardRevealAnimation from "@/components/CardRevealAnimation";
 import { getCardImageUrl } from "@shared/tarotImages";
 import { calculateNumerology } from "@shared/numerology";
 import { CARD_NAMES } from "@shared/tarotContentIndex";
+import { trpc } from "@/lib/trpc";
 import gsap from "gsap";
 
 // Card preview data — use CDN images
@@ -31,6 +32,7 @@ function getMaxDays(month: number, year: number): number {
 
 export default function Home() {
   const [, navigate] = useLocation();
+  const searchStr = useSearch();
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
@@ -42,6 +44,34 @@ export default function Home() {
   const formRef = useRef<HTMLDivElement>(null);
   const monthRef = useRef<HTMLInputElement>(null);
   const dayRef = useRef<HTMLInputElement>(null);
+
+  const recordClickMutation = trpc.shares.recordClick.useMutation();
+
+  // ─── Handle ?ref= param: store invite code & record click ────────
+  useEffect(() => {
+    const sp = new URLSearchParams(searchStr);
+    const ref = sp.get("ref");
+    if (!ref) return;
+
+    // Store invite code in sessionStorage for later use (when invitee completes calc)
+    const alreadyRecorded = sessionStorage.getItem("ref_recorded");
+    sessionStorage.setItem("invite_code", ref);
+
+    // Record click (only once per session)
+    if (!alreadyRecorded) {
+      sessionStorage.setItem("ref_recorded", "true");
+      recordClickMutation.mutate({ inviteCode: ref });
+    }
+
+    // Pre-fill birthday if provided in share link
+    const b = sp.get("b");
+    if (b && /^\d{4}-\d{2}-\d{2}$/.test(b)) {
+      const [bYear, bMonth, bDay] = b.split("-");
+      // Don't pre-fill — the invitee should enter their own birthday
+      // But we could show a message like "你的朋友邀請你來算靈數"
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchStr]);
 
   // GSAP entrance animation
   useEffect(() => {

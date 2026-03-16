@@ -9,7 +9,9 @@ import StarfieldBackground from "@/components/StarfieldBackground";
 import PointsBar from "@/components/PointsBar";
 import SubconsciousPaywall from "@/components/SubconsciousPaywall";
 import FirstCalcReward from "@/components/FirstCalcReward";
+import ShareDialog from "@/components/ShareDialog";
 import { usePoints } from "@/hooks/usePoints";
+import { trpc } from "@/lib/trpc";
 import { calculateNumerology, type NumerologyResult } from "@shared/numerology";
 import { getCardContent, CARD_NAMES, type TarotCardContent } from "@shared/tarotContentIndex";
 import { YEAR_CONTENT, type YearContent } from "@shared/yearContent";
@@ -236,6 +238,9 @@ export default function Result() {
   const [showFirstCalcReward, setShowFirstCalcReward] = useState(false);
   const [firstCalcAmount, setFirstCalcAmount] = useState(0);
   const { claimFirstCalc, isFirstCalc } = usePoints();
+  const [showShareDialog, setShowShareDialog] = useState(false);
+
+  const claimInviteBonusMutation = trpc.shares.claimInviteBonus.useMutation();
 
   // Parse query params
   const params = useMemo(() => {
@@ -318,6 +323,14 @@ export default function Result() {
           setFirstCalcAmount(30);
           setShowFirstCalcReward(true);
         }
+
+        // Check if this user was invited (ref code in sessionStorage)
+        const inviteCode = sessionStorage.getItem("invite_code");
+        const inviteClaimed = sessionStorage.getItem("invite_claimed");
+        if (inviteCode && !inviteClaimed && res.isNewProfile) {
+          sessionStorage.setItem("invite_claimed", "true");
+          claimInviteBonusMutation.mutate({ inviteCode });
+        }
       })
       .catch(() => {
         // Silently fail — user can still see free content
@@ -374,6 +387,7 @@ export default function Result() {
               variant="outline"
               size="sm"
               className="border-gold/30 text-gold hover:bg-gold/10 text-xs"
+              onClick={() => setShowShareDialog(true)}
             >
               <Share2 className="w-3 h-3 mr-1" />
               分享
@@ -508,13 +522,14 @@ export default function Result() {
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: Share2, label: "分享報告", points: "+10", color: "text-blue-400" },
-                { icon: Users, label: "邀請好友", points: "+20", color: "text-green-400" },
-                { icon: Gift, label: "分享圖卡", points: "+15", color: "text-purple-400" },
-                { icon: Calendar, label: "每日簽到", points: "+5", color: "text-orange-400" },
-              ].map(({ icon: Icon, label, points, color }) => (
+                { icon: Share2, label: "分享報告", points: "+10", color: "text-blue-400", action: () => setShowShareDialog(true) },
+                { icon: Users, label: "邀請好友", points: "+20", color: "text-green-400", action: () => setShowShareDialog(true) },
+                { icon: Gift, label: "分享圖卡", points: "+15", color: "text-purple-400", action: undefined },
+                { icon: Calendar, label: "每日簽到", points: "+5", color: "text-orange-400", action: undefined },
+              ].map(({ icon: Icon, label, points, color, action }) => (
                 <button
                   key={label}
+                  onClick={action}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl bg-midnight-light/50 hover:bg-gold/10 transition-colors border border-transparent hover:border-gold/20"
                 >
                   <Icon className={`w-5 h-5 ${color}`} />
@@ -533,6 +548,13 @@ export default function Result() {
           </div>
         </main>
       </div>
+
+      {/* Share Dialog */}
+      <ShareDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        birthday={result ? `${params.y}-${String(params.m).padStart(2, "0")}-${String(params.d).padStart(2, "0")}` : undefined}
+      />
     </div>
   );
 }
