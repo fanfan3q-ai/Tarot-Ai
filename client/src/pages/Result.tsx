@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useRef, useState, useCallback } from "react";
 import { useSearch, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,6 +6,10 @@ import {
   ChevronLeft, Share2, Gift, Calendar, ArrowRight, CheckCircle2
 } from "lucide-react";
 import StarfieldBackground from "@/components/StarfieldBackground";
+import PointsBar from "@/components/PointsBar";
+import SubconsciousPaywall from "@/components/SubconsciousPaywall";
+import FirstCalcReward from "@/components/FirstCalcReward";
+import { usePoints } from "@/hooks/usePoints";
 import { calculateNumerology, type NumerologyResult } from "@shared/numerology";
 import { getCardContent, CARD_NAMES, type TarotCardContent } from "@shared/tarotContentIndex";
 import { YEAR_CONTENT, type YearContent } from "@shared/yearContent";
@@ -126,65 +130,6 @@ function ConsciousnessSection({ content }: { content: string }) {
   );
 }
 
-// ─── Paywall Section ────────────────────────────────────────────────
-function PaywallSection({ content, courseCta }: { content: string; courseCta: string }) {
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const previewText = content.slice(0, Math.min(content.length, 120));
-
-  if (isUnlocked) {
-    return (
-      <div className="glass-card rounded-xl p-4 sm:p-6">
-        <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans-tc whitespace-pre-line">
-          {content}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative">
-      {/* Blurred preview */}
-      <div className="glass-card rounded-xl p-4 sm:p-6 paywall-blur">
-        <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans-tc">
-          {previewText}...
-        </p>
-        <p className="text-sm text-foreground/60 leading-relaxed font-sans-tc mt-3">
-          {content.slice(120, 200)}...
-        </p>
-      </div>
-
-      {/* Unlock overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-end pb-6 z-10">
-        <div className="text-center px-4">
-          <Lock className="w-8 h-8 text-gold/60 mx-auto mb-3" />
-          <p className="text-sm text-foreground/80 font-sans-tc mb-1">
-            潛意識密碼需要 <span className="text-gold font-semibold">50 積分</span> 解鎖
-          </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            分享報告或邀請好友即可獲得積分
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 justify-center">
-            <Button
-              onClick={() => setIsUnlocked(true)}
-              className="bg-gold hover:bg-gold-light text-midnight font-sans-tc font-semibold px-6 py-2.5 rounded-xl animate-glow-pulse"
-            >
-              <Lock className="w-4 h-4 mr-2" />
-              使用 50 積分解鎖
-            </Button>
-            <Button
-              variant="outline"
-              className="border-gold/30 text-gold hover:bg-gold/10 font-sans-tc px-6 py-2.5 rounded-xl"
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              分享賺積分
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Year Number Section ────────────────────────────────────────────
 function YearSection({ yearNumber, yearContent }: { yearNumber: number; yearContent: YearContent | undefined }) {
   if (!yearContent) return null;
@@ -264,9 +209,14 @@ function CourseCTA({ cardName, courseCta }: { cardName: string; courseCta: strin
           <span className="font-cinzel text-2xl text-gold-gradient font-bold">$499</span>
           <span className="text-xs text-gold/60 ml-1">限時體驗價</span>
         </div>
-        <Button className="bg-gold hover:bg-gold-light text-midnight font-sans-tc font-semibold px-8 py-3 rounded-xl text-base animate-glow-pulse">
-          預約體驗課程
-          <ArrowRight className="w-4 h-4 ml-2" />
+        <Button
+          asChild
+          className="bg-gold hover:bg-gold-light text-midnight font-sans-tc font-semibold px-8 py-3 rounded-xl text-base animate-glow-pulse"
+        >
+          <a href="https://www.instagram.com/tarot_song6866" target="_blank" rel="noopener noreferrer">
+            預約體驗課程
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </a>
         </Button>
         <p className="text-xs text-muted-foreground mt-3">
           由陳彩綺認證塔羅靈數老師親自指導
@@ -281,6 +231,11 @@ export default function Result() {
   const [, navigate] = useLocation();
   const searchStr = useSearch();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [profileId, setProfileId] = useState<number | null>(null);
+  const [subconsciousUnlocked, setSubconsciousUnlocked] = useState(false);
+  const [showFirstCalcReward, setShowFirstCalcReward] = useState(false);
+  const [firstCalcAmount, setFirstCalcAmount] = useState(0);
+  const { claimFirstCalc, isFirstCalc } = usePoints();
 
   // Parse query params
   const params = useMemo(() => {
@@ -340,6 +295,36 @@ export default function Result() {
     );
   }, [result]);
 
+  // Trigger first-calc bonus when result loads
+  useEffect(() => {
+    if (!result || isFirstCalc) return;
+
+    const birthday = `${params.y}-${String(params.m).padStart(2, "0")}-${String(params.d).padStart(2, "0")}`;
+
+    claimFirstCalc({
+      birthday,
+      zodiacSign: result.zodiacSign,
+      mainNumber: result.mainNumber,
+      behaviorNumber: result.behaviorNumber,
+      traitNumber: result.traitNumber,
+      yearNumber: result.yearNumber,
+      digitSum: result.digitSum,
+      birthDayNum: params.d,
+    })
+      .then((res) => {
+        if (res.profileId) setProfileId(res.profileId);
+        if (res.unlockedSubconscious) setSubconsciousUnlocked(true);
+        if (res.awarded) {
+          setFirstCalcAmount(30);
+          setShowFirstCalcReward(true);
+        }
+      })
+      .catch(() => {
+        // Silently fail — user can still see free content
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result?.mainNumber]);
+
   // Redirect if no valid params
   if (!result) {
     return (
@@ -361,6 +346,15 @@ export default function Result() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
       <StarfieldBackground />
+      <PointsBar />
+
+      {/* First-calc reward toast */}
+      {showFirstCalcReward && (
+        <FirstCalcReward
+          points={firstCalcAmount}
+          onDismiss={() => setShowFirstCalcReward(false)}
+        />
+      )}
 
       <div ref={containerRef} className="content-section">
         {/* Header */}
@@ -477,10 +471,18 @@ export default function Result() {
           {mainCardContent && (
             <section>
               <SectionHeader icon={Lock} title="潛意識密碼" subtitle="你靈魂深處的隱藏模式" free={false} />
-              <PaywallSection
-                content={mainCardContent.subconsciousLayer}
-                courseCta={mainCardContent.courseCta}
-              />
+              {subconsciousUnlocked ? (
+                <div className="glass-card rounded-xl p-4 sm:p-6">
+                  <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans-tc whitespace-pre-line">
+                    {mainCardContent.subconsciousLayer}
+                  </p>
+                </div>
+              ) : (
+                <SubconsciousPaywall
+                  profileId={profileId}
+                  onUnlocked={() => setSubconsciousUnlocked(true)}
+                />
+              )}
             </section>
           )}
 

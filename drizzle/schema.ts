@@ -12,6 +12,7 @@ export const users = mysqlTable("users", {
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   points: int("points").default(0).notNull(),
+  isFirstCalc: boolean("isFirstCalc").default(false).notNull(),
   inviteCode: varchar("inviteCode", { length: 16 }).unique(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

@@ -22,6 +22,13 @@
       "when": 1773607500179,
       "tag": "0002_chief_puma",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1773686554737,
+      "tag": "0003_chilly_amazoness",
+      "breakpoints": true
     }
   ]
 }

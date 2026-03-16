@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `isFirstCalc` boolean DEFAULT false NOT NULL;
