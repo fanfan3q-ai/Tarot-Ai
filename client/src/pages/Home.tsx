@@ -1,46 +1,47 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Star, Eye, Lock, ChevronDown } from "lucide-react";
+import { Sparkles, Star, Eye, Lock } from "lucide-react";
 import StarfieldBackground from "@/components/StarfieldBackground";
+import CardRevealAnimation from "@/components/CardRevealAnimation";
+import { getCardImageUrl } from "@shared/tarotImages";
+import { calculateNumerology } from "@shared/numerology";
+import { CARD_NAMES } from "@shared/tarotContentIndex";
 import gsap from "gsap";
 
-const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
-const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
-const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: 100 }, (_, i) => CURRENT_YEAR - i);
-
-// Card preview data
+// Card preview data — use CDN images
 const PREVIEW_CARDS = [
-  { num: 1, emoji: "🪄", name: "魔術師" },
-  { num: 6, emoji: "💖", name: "戀人" },
-  { num: 9, emoji: "🌟", name: "隱士" },
-  { num: 17, emoji: "⭐", name: "星星" },
-  { num: 21, emoji: "🌍", name: "世界" },
+  { num: 1, name: "魔術師" },
+  { num: 6, name: "戀人" },
+  { num: 9, name: "隱士" },
+  { num: 17, name: "星星" },
+  { num: 21, name: "世界" },
 ];
+
+/** Get max days for a given month/year */
+function getMaxDays(month: number, year: number): number {
+  if (!month) return 31;
+  if ([4, 6, 9, 11].includes(month)) return 30;
+  if (month === 2) {
+    if (!year) return 29;
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 29 : 28;
+  }
+  return 31;
+}
 
 export default function Home() {
   const [, navigate] = useLocation();
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
   const [day, setDay] = useState("");
+  const [errors, setErrors] = useState<{ year?: string; month?: string; day?: string }>({});
   const [isCalculating, setIsCalculating] = useState(false);
+  const [showReveal, setShowReveal] = useState(false);
+  const [revealData, setRevealData] = useState<{ mainNumber: number; cardName: string } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
-
-  // Validate days based on month/year
-  const maxDays = useMemo(() => {
-    if (!month || !year) return 31;
-    const m = parseInt(month);
-    const y = parseInt(year);
-    if ([4, 6, 9, 11].includes(m)) return 30;
-    if (m === 2) {
-      return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0 ? 29 : 28;
-    }
-    return 31;
-  }, [month, year]);
-
-  const validDays = useMemo(() => DAYS.filter(d => d <= maxDays), [maxDays]);
+  const monthRef = useRef<HTMLInputElement>(null);
+  const dayRef = useRef<HTMLInputElement>(null);
 
   // GSAP entrance animation
   useEffect(() => {
@@ -58,17 +59,117 @@ export default function Home() {
     );
   }, []);
 
-  const isValid = year && month && day && parseInt(day) <= maxDays;
+  // ─── Year handler ─────────────────────────────────────────────────
+  const handleYearChange = useCallback((value: string) => {
+    // Only allow digits, max 4 chars
+    const cleaned = value.replace(/\D/g, "").slice(0, 4);
+    setYear(cleaned);
+    setErrors(prev => ({ ...prev, year: undefined }));
 
+    // Auto-jump to month when 4 digits entered
+    if (cleaned.length === 4) {
+      const y = parseInt(cleaned);
+      if (y < 1900 || y > 2026) {
+        setErrors(prev => ({ ...prev, year: "請輸入 1900-2026" }));
+      } else {
+        monthRef.current?.focus();
+      }
+    }
+  }, []);
+
+  // ─── Month handler ────────────────────────────────────────────────
+  const handleMonthChange = useCallback((value: string) => {
+    const cleaned = value.replace(/\D/g, "").slice(0, 2);
+    setMonth(cleaned);
+    setErrors(prev => ({ ...prev, month: undefined }));
+
+    const m = parseInt(cleaned);
+    if (cleaned.length === 2) {
+      if (m < 1 || m > 12) {
+        setErrors(prev => ({ ...prev, month: "請輸入 1-12" }));
+      } else {
+        dayRef.current?.focus();
+      }
+    }
+    // Also auto-jump if user types a single digit that can only be one month (e.g. "2"-"9")
+    if (cleaned.length === 1 && m >= 2 && m <= 9) {
+      // Wait a beat — user might be typing "12" starting with "1"
+      // Only auto-jump for 2-9 since they can't be the start of a two-digit month > 12
+      // Actually "1" could be 10,11,12 so don't jump. But 2-9 are unambiguous.
+      // We'll let 2-digit logic handle it.
+    }
+  }, []);
+
+  // ─── Day handler ──────────────────────────────────────────────────
+  const handleDayChange = useCallback(
+    (value: string) => {
+      const cleaned = value.replace(/\D/g, "").slice(0, 2);
+      setDay(cleaned);
+      setErrors(prev => ({ ...prev, day: undefined }));
+
+      if (cleaned.length >= 1) {
+        const d = parseInt(cleaned);
+        const m = parseInt(month) || 0;
+        const y = parseInt(year) || 0;
+        const max = getMaxDays(m, y);
+        if (cleaned.length === 2 && (d < 1 || d > max)) {
+          setErrors(prev => ({ ...prev, day: `請輸入 1-${max}` }));
+        }
+      }
+    },
+    [month, year]
+  );
+
+  // ─── Validation ───────────────────────────────────────────────────
+  const isValid = useMemo(() => {
+    const y = parseInt(year);
+    const m = parseInt(month);
+    const d = parseInt(day);
+    if (!y || !m || !d) return false;
+    if (y < 1900 || y > 2026) return false;
+    if (m < 1 || m > 12) return false;
+    const max = getMaxDays(m, y);
+    if (d < 1 || d > max) return false;
+    if (year.length < 4) return false;
+    return true;
+  }, [year, month, day]);
+
+  // ─── Submit ───────────────────────────────────────────────────────
   const handleCalculate = useCallback(() => {
     if (!isValid) return;
     setIsCalculating(true);
 
-    // Brief animation delay for dramatic effect
-    setTimeout(() => {
-      navigate(`/result?y=${year}&m=${month}&d=${day}`);
-    }, 800);
-  }, [isValid, year, month, day, navigate]);
+    // Calculate numerology to get the main number for the reveal animation
+    const y = parseInt(year);
+    const m = parseInt(month);
+    const d = parseInt(day);
+    const result = calculateNumerology(y, m, d);
+    const cardInfo = CARD_NAMES[result.mainNumber];
+
+    setRevealData({
+      mainNumber: result.mainNumber,
+      cardName: cardInfo?.zh || `${result.mainNumber} 號`,
+    });
+    setShowReveal(true);
+  }, [isValid, year, month, day]);
+
+  const handleRevealComplete = useCallback(() => {
+    navigate(`/result?y=${year}&m=${month}&d=${day}`);
+  }, [year, month, day, navigate]);
+
+  // Allow Enter key to submit
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && isValid) {
+        handleCalculate();
+      }
+    },
+    [isValid, handleCalculate]
+  );
+
+  // Shared input class
+  const inputBaseClass =
+    "w-full bg-input border rounded-lg px-3 py-3 sm:py-3.5 text-center text-sm sm:text-base text-foreground font-cinzel tracking-wider focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all placeholder:text-muted-foreground/40 placeholder:font-sans-tc placeholder:tracking-normal";
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
@@ -123,59 +224,61 @@ export default function Home() {
               輸入你的西元生日
             </h2>
 
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6" onKeyDown={handleKeyDown}>
               {/* Year */}
-              <div className="relative">
+              <div>
                 <label className="block text-xs text-muted-foreground mb-1.5 font-sans-tc">年</label>
-                <div className="relative">
-                  <select
-                    value={year}
-                    onChange={e => setYear(e.target.value)}
-                    className="w-full appearance-none bg-input border border-border rounded-lg px-3 py-3 sm:py-3.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
-                  >
-                    <option value="">年份</option>
-                    {YEARS.map(y => (
-                      <option key={y} value={y}>{y}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={year}
+                  onChange={e => handleYearChange(e.target.value)}
+                  placeholder="YYYY"
+                  maxLength={4}
+                  autoComplete="off"
+                  className={`${inputBaseClass} ${errors.year ? "border-destructive ring-1 ring-destructive/50" : "border-border"}`}
+                />
+                {errors.year && (
+                  <p className="text-[10px] text-destructive mt-1 font-sans-tc">{errors.year}</p>
+                )}
               </div>
 
               {/* Month */}
-              <div className="relative">
+              <div>
                 <label className="block text-xs text-muted-foreground mb-1.5 font-sans-tc">月</label>
-                <div className="relative">
-                  <select
-                    value={month}
-                    onChange={e => setMonth(e.target.value)}
-                    className="w-full appearance-none bg-input border border-border rounded-lg px-3 py-3 sm:py-3.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
-                  >
-                    <option value="">月份</option>
-                    {MONTHS.map(m => (
-                      <option key={m} value={m}>{m} 月</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <input
+                  ref={monthRef}
+                  type="text"
+                  inputMode="numeric"
+                  value={month}
+                  onChange={e => handleMonthChange(e.target.value)}
+                  placeholder="MM"
+                  maxLength={2}
+                  autoComplete="off"
+                  className={`${inputBaseClass} ${errors.month ? "border-destructive ring-1 ring-destructive/50" : "border-border"}`}
+                />
+                {errors.month && (
+                  <p className="text-[10px] text-destructive mt-1 font-sans-tc">{errors.month}</p>
+                )}
               </div>
 
               {/* Day */}
-              <div className="relative">
+              <div>
                 <label className="block text-xs text-muted-foreground mb-1.5 font-sans-tc">日</label>
-                <div className="relative">
-                  <select
-                    value={day}
-                    onChange={e => setDay(e.target.value)}
-                    className="w-full appearance-none bg-input border border-border rounded-lg px-3 py-3 sm:py-3.5 text-sm sm:text-base text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
-                  >
-                    <option value="">日期</option>
-                    {validDays.map(d => (
-                      <option key={d} value={d}>{d} 日</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
+                <input
+                  ref={dayRef}
+                  type="text"
+                  inputMode="numeric"
+                  value={day}
+                  onChange={e => handleDayChange(e.target.value)}
+                  placeholder="DD"
+                  maxLength={2}
+                  autoComplete="off"
+                  className={`${inputBaseClass} ${errors.day ? "border-destructive ring-1 ring-destructive/50" : "border-border"}`}
+                />
+                {errors.day && (
+                  <p className="text-[10px] text-destructive mt-1 font-sans-tc">{errors.day}</p>
+                )}
               </div>
             </div>
 
@@ -208,20 +311,34 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Card Preview Carousel */}
+        {/* Card Preview Carousel — CDN images */}
         <div className="mt-10 sm:mt-14 w-full max-w-lg mx-auto">
           <div className="flex justify-center gap-3 sm:gap-4 overflow-x-auto pb-4 px-4 scrollbar-hide">
-            {PREVIEW_CARDS.map((card, i) => (
-              <div
-                key={card.num}
-                className="flex-shrink-0 w-16 sm:w-20 glass-card rounded-xl p-2 sm:p-3 text-center transition-transform hover:scale-105"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
-                <div className="text-2xl sm:text-3xl mb-1">{card.emoji}</div>
-                <div className="text-[10px] sm:text-xs text-gold/70 font-sans-tc">{card.name}</div>
-                <div className="text-[10px] text-muted-foreground">{card.num}</div>
-              </div>
-            ))}
+            {PREVIEW_CARDS.map((card, i) => {
+              const imageUrl = getCardImageUrl(card.num);
+              return (
+                <div
+                  key={card.num}
+                  className="flex-shrink-0 w-16 sm:w-20 glass-card rounded-xl p-2 sm:p-3 text-center transition-transform hover:scale-105"
+                  style={{ animationDelay: `${i * 0.1}s` }}
+                >
+                  {imageUrl ? (
+                    <div className="w-12 h-18 sm:w-16 sm:h-24 mx-auto mb-1 rounded-md overflow-hidden border border-gold/20">
+                      <img
+                        src={imageUrl}
+                        alt={card.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-2xl sm:text-3xl mb-1">✨</div>
+                  )}
+                  <div className="text-[10px] sm:text-xs text-gold/70 font-sans-tc">{card.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{card.num}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -231,6 +348,15 @@ export default function Home() {
           <p>你的資料僅用於計算，不會被儲存或分享</p>
         </div>
       </section>
+
+      {/* Card Reveal Animation Overlay */}
+      {showReveal && revealData && (
+        <CardRevealAnimation
+          mainNumber={revealData.mainNumber}
+          cardName={revealData.cardName}
+          onComplete={handleRevealComplete}
+        />
+      )}
     </div>
   );
 }

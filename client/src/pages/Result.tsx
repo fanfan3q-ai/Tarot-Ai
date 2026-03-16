@@ -9,6 +9,7 @@ import StarfieldBackground from "@/components/StarfieldBackground";
 import { calculateNumerology, type NumerologyResult } from "@shared/numerology";
 import { getCardContent, CARD_NAMES, type TarotCardContent } from "@shared/tarotContentIndex";
 import { YEAR_CONTENT, type YearContent } from "@shared/yearContent";
+import { getCardImageUrl } from "@shared/tarotImages";
 import gsap from "gsap";
 
 // ─── Number Card Component ─────────────────────────────────────────
@@ -26,6 +27,7 @@ function NumberCard({
   delay?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const imageUrl = getCardImageUrl(number);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -39,7 +41,18 @@ function NumberCard({
   return (
     <div ref={ref} className="glass-card rounded-2xl p-4 sm:p-6 text-center" style={{ perspective: "800px" }}>
       <p className="text-xs sm:text-sm text-gold/60 font-sans-tc mb-2">{label}</p>
-      <div className="text-3xl sm:text-4xl mb-1">{emoji}</div>
+      {imageUrl ? (
+        <div className="relative w-16 h-24 sm:w-20 sm:h-30 mx-auto mb-2 rounded-lg overflow-hidden border border-gold/20">
+          <img
+            src={imageUrl}
+            alt={`${cardName} tarot card`}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      ) : (
+        <div className="text-3xl sm:text-4xl mb-1">{emoji}</div>
+      )}
       <div className="font-cinzel text-3xl sm:text-4xl md:text-5xl text-gold-gradient font-bold mb-1">
         {number}
       </div>
