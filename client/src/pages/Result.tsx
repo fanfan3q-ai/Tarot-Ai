@@ -45,7 +45,7 @@ function NumberCard({
   }, [delay]);
 
   return (
-    <div ref={ref} className="glass-card rounded-2xl p-4 sm:p-6 text-center" style={{ perspective: "800px" }}>
+    <div ref={ref} className="glass-card rounded-2xl p-4 sm:p-6 text-center flex-shrink-0 w-[140px] sm:w-auto snap-center" style={{ perspective: "800px" }}>
       <p className="text-xs sm:text-sm text-gold/60 font-sans-tc mb-2">{label}</p>
       {imageUrl ? (
         <div className="relative w-16 h-24 sm:w-20 sm:h-30 mx-auto mb-2 rounded-lg overflow-hidden border border-gold/20">
@@ -90,22 +90,23 @@ function SectionHeader({ icon: Icon, title, subtitle, free = true }: {
       )}
     </div>
   );
-}
-
-// ─── Consciousness Layer Section ────────────────────────────────────
+}// ─── Consciousness Layer Section ────────────────────────────────────────
 function ConsciousnessSection({ content }: { content: string }) {
-  const paragraphs = content.split("\n\n").filter(Boolean);
+  const [activeTab, setActiveTab] = useState(0);
 
-  // Try to identify sections by content patterns
+  // Split by double newline first; if only 1 part, try single newline
+  let paragraphs = content.split("\n\n").filter(Boolean);
+  if (paragraphs.length < 3) {
+    paragraphs = content.split("\n").filter(Boolean);
+  }
+
   const sections = useMemo(() => {
     const result: { icon: React.ComponentType<{ className?: string }>; title: string; text: string }[] = [];
-    
     if (paragraphs.length >= 3) {
       result.push({ icon: Heart, title: "感情模式", text: paragraphs[0] });
       result.push({ icon: Briefcase, title: "職場特質", text: paragraphs[1] });
       result.push({ icon: Users, title: "人際動態", text: paragraphs[2] });
     } else {
-      // Fallback: just render all paragraphs
       paragraphs.forEach((p, i) => {
         const icons = [Heart, Briefcase, Users];
         const titles = ["感情模式", "職場特質", "人際動態"];
@@ -116,23 +117,63 @@ function ConsciousnessSection({ content }: { content: string }) {
   }, [paragraphs]);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {sections.map((section, i) => (
-        <div key={i} className="glass-card rounded-xl p-4 sm:p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <section.icon className="w-4 h-4 text-gold/70" />
-            <h4 className="font-serif-tc text-sm sm:text-base text-gold/80">{section.title}</h4>
+    <div>
+      {/* Mobile: Tab switcher */}
+      <div className="flex sm:hidden gap-1 mb-4 overflow-x-auto snap-x snap-mandatory pb-1 scrollbar-hide">
+        {sections.map((section, i) => {
+          const Icon = section.icon;
+          return (
+            <button
+              key={i}
+              onClick={() => setActiveTab(i)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-sans-tc whitespace-nowrap snap-center transition-all flex-shrink-0 ${
+                activeTab === i
+                  ? "bg-gold/15 text-gold border border-gold/30"
+                  : "bg-midnight-light/50 text-foreground/50 border border-transparent"
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {section.title}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Mobile: Show only active tab content */}
+      <div className="block sm:hidden">
+        {sections[activeTab] && (
+          <div className="glass-card rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              {(() => {
+                const Icon = sections[activeTab].icon;
+                return <Icon className="w-4 h-4 text-gold/70" />;
+              })()}
+              <h4 className="font-serif-tc text-sm text-gold/80">{sections[activeTab].title}</h4>
+            </div>
+            <p className="text-sm text-foreground/80 leading-relaxed font-sans-tc">
+              {sections[activeTab].text}
+            </p>
           </div>
-          <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans-tc">
-            {section.text}
-          </p>
-        </div>
-      ))}
+        )}
+      </div>
+
+      {/* Desktop: Show all sections */}
+      <div className="hidden sm:block space-y-6">
+        {sections.map((section, i) => (
+          <div key={i} className="glass-card rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <section.icon className="w-4 h-4 text-gold/70" />
+              <h4 className="font-serif-tc text-base text-gold/80">{section.title}</h4>
+            </div>
+            <p className="text-base text-foreground/80 leading-relaxed font-sans-tc">
+              {section.text}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
-
-// ─── Year Number Section ────────────────────────────────────────────
+}// ─── Year Number Section ────────────────────────────────────────────
 function YearSection({ yearNumber, yearContent }: { yearNumber: number; yearContent: YearContent | undefined }) {
   if (!yearContent) return null;
 
@@ -395,7 +436,7 @@ export default function Result() {
           </div>
         </header>
 
-        <main className="container py-6 sm:py-10 space-y-8 sm:space-y-12 max-w-2xl mx-auto">
+        <main className="container py-6 sm:py-10 space-y-8 sm:space-y-12 max-w-2xl mx-auto px-4 sm:px-6">
           {/* Birthday & Zodiac Info */}
           <div className="text-center">
             <p className="text-sm text-muted-foreground font-sans-tc mb-1">
@@ -406,8 +447,8 @@ export default function Result() {
             </h2>
           </div>
 
-          {/* Three Number Cards */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          {/* Three Number Cards — horizontal scroll on mobile */}
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:overflow-visible">
             <NumberCard
               label="主命數"
               number={result.mainNumber}
@@ -436,8 +477,14 @@ export default function Result() {
             <section>
               <SectionHeader icon={Star} title="天賦本質" subtitle={`${mainCardContent.nameZh} · ${mainCardContent.nameEn}`} />
               <div className="soul-gift-box">
-                <p className="text-sm sm:text-base text-gold/90 font-serif-tc italic leading-relaxed">
-                  {mainCardContent.soulGift}
+                <p className="text-sm sm:text-base text-gold/90 font-serif-tc italic leading-relaxed" style={{ lineHeight: '1.9' }}>
+                  你的天賦數是 {mainCardContent.number}，
+                  <br />
+                  {mainCardContent.number} 是{mainCardContent.nameZh}。
+                  <br />
+                  {mainCardContent.nameZh}代表「<span className="font-semibold">{mainCardContent.coreSymbol}</span>」的意思，
+                  <br />
+                  所以擁有這張牌的你，{mainCardContent.soulGift.replace(/^擁有這張牌的你[，,]\s*/, '')}
                 </p>
               </div>
 
@@ -486,10 +533,66 @@ export default function Result() {
             <section>
               <SectionHeader icon={Lock} title="潛意識密碼" subtitle="你靈魂深處的隱藏模式" free={false} />
               {subconsciousUnlocked ? (
-                <div className="glass-card rounded-xl p-4 sm:p-6">
-                  <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans-tc whitespace-pre-line">
-                    {mainCardContent.subconsciousLayer}
-                  </p>
+                <div className="space-y-6">
+                  {/* Original subconscious content */}
+                  <div className="glass-card rounded-xl p-4 sm:p-6">
+                    <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans-tc whitespace-pre-line">
+                      {mainCardContent.subconsciousLayer}
+                    </p>
+                  </div>
+
+                  {/* ◆ 你是什麼樣的人 */}
+                  {mainCardContent.whatKindOfPerson && (
+                    <div className="rounded-2xl p-5 sm:p-8 border border-purple-500/20 bg-gradient-to-br from-purple-900/20 to-transparent">
+                      <h4 className="flex items-center gap-2 mb-4">
+                        <span className="text-gold text-lg">◆</span>
+                        <span className="font-garamond italic text-base sm:text-lg text-foreground/90">你是什麼樣的人</span>
+                      </h4>
+                      <div className="space-y-4">
+                        {mainCardContent.whatKindOfPerson.split('\n').filter(Boolean).map((p, i) => (
+                          <p key={i} className="text-sm sm:text-base text-foreground/80 font-garamond italic leading-relaxed" style={{ lineHeight: '1.9' }}>
+                            {p}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ◆ 可以開始行動的三件事 */}
+                  {mainCardContent.threeActions && mainCardContent.threeActions.length > 0 && (
+                    <div className="rounded-2xl p-5 sm:p-8 border border-purple-500/20 bg-gradient-to-br from-purple-900/20 to-transparent">
+                      <h4 className="flex items-center gap-2 mb-4">
+                        <span className="text-gold text-lg">◆</span>
+                        <span className="font-garamond italic text-base sm:text-lg text-foreground/90">可以開始行動的三件事</span>
+                      </h4>
+                      <div className="space-y-5">
+                        {mainCardContent.threeActions.map((action, i) => (
+                          <div key={i} className="flex gap-3">
+                            <span className="text-gold font-cinzel font-bold text-lg mt-0.5 flex-shrink-0">{i + 1}.</span>
+                            <div>
+                              <h5 className="text-sm sm:text-base text-gold/90 font-semibold font-sans-tc mb-1">{action.title}</h5>
+                              <p className="text-sm text-foreground/70 font-garamond italic leading-relaxed" style={{ lineHeight: '1.9' }}>
+                                {action.description}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ◆ 最容易忽略的事 */}
+                  {mainCardContent.easilyOverlooked && (
+                    <div className="rounded-2xl p-5 sm:p-8 border border-purple-500/20 bg-gradient-to-br from-purple-900/20 to-transparent">
+                      <h4 className="flex items-center gap-2 mb-4">
+                        <span className="text-gold text-lg">◆</span>
+                        <span className="font-garamond italic text-base sm:text-lg text-foreground/90">最容易忽略的事</span>
+                      </h4>
+                      <p className="text-sm sm:text-base text-foreground/80 font-garamond italic leading-relaxed" style={{ lineHeight: '1.9' }}>
+                        {mainCardContent.easilyOverlooked}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <SubconsciousPaywall

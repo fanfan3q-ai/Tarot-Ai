@@ -220,13 +220,13 @@ export default function Home() {
           </div>
 
           {/* Subtitle above title */}
-          <p className="font-cinzel text-[0.75rem] tracking-[0.3em] text-gold/50 mb-3">
+          <p className="font-cinzel text-[0.6rem] sm:text-[0.75rem] tracking-[0.3em] text-gold/50 mb-3">
             ARCANA MYSTICAL JOURNEY
           </p>
 
           {/* Title — enhanced with glow */}
           <h1
-            className="font-cinzel text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4"
+            className="font-cinzel text-[2.2rem] sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4"
             style={{
               background: "linear-gradient(135deg, #f5d98a, #c8952a)",
               WebkitBackgroundClip: "text",
@@ -251,7 +251,7 @@ export default function Home() {
           </p>
 
           {/* Poetic Three Lines — CSS grid aligned */}
-          <div className="mt-8 max-w-sm mx-auto">
+          <div className="mt-8 max-w-sm mx-auto px-6 sm:px-0">
             <p className="text-center text-gold/30 tracking-[0.3em] text-xs">──── ✦ ✦ ✦ ────</p>
             <div
               className="py-4 mx-auto"
@@ -347,7 +347,7 @@ export default function Home() {
             <Button
               onClick={handleCalculate}
               disabled={!isValid || isCalculating}
-              className="w-full py-4 sm:py-5 text-base sm:text-lg font-serif-tc bg-gold hover:bg-gold-light text-midnight font-semibold rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed animate-glow-pulse"
+              className="w-[90%] sm:w-full mx-auto block py-4 sm:py-5 text-base sm:text-lg font-serif-tc bg-gold hover:bg-gold-light text-midnight font-semibold rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed animate-glow-pulse"
             >
               {isCalculating ? (
                 <span className="flex items-center gap-2">

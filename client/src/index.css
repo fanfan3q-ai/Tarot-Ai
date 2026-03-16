@@ -288,6 +288,20 @@
     }
   }
 
+  /* Hide scrollbar for horizontal scroll containers */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Garamond font */
+  .font-garamond {
+    font-family: 'Cormorant Garamond', serif;
+  }
+
   /* Glow pulse for CTA */
   .animate-glow-pulse {
     animation: glowPulse 2s ease-in-out infinite;
