@@ -2,7 +2,7 @@
 
 > 基於陳彩綺塔羅靈數系統的互動式命運解析應用。輸入西元生日，即可獲得主命數、行為數、特質數與 2026 流年數的完整三層解析。
 
-**線上網址**：[tarotnumapp.manus.space](https://tarotnumapp.manus.space)
+**線上網址**：(https://tarot-ai-284ad.web.app/)
 
 ---
 
