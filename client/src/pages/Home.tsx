@@ -12,6 +12,36 @@ import { CARD_NAMES } from "@shared/tarotContentIndex";
 import { trpc } from "@/lib/trpc";
 import gsap from "gsap";
 
+/** Animated counter hook: counts from (target - 100) to target over 1.5s */
+function useAnimatedCounter(target: number | null): string {
+  const [display, setDisplay] = useState<number | null>(null);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (target === null) return;
+    const start = Math.max(0, target - 100);
+    const duration = 1500; // ms
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + (target - start) * eased);
+      setDisplay(current);
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target]);
+
+  if (display === null) return "...";
+  return display.toLocaleString("en-US");
+}
+
 // Card preview data — use CDN images
 const PREVIEW_CARDS = [
   { num: 1, name: "魔術師" },
@@ -42,12 +72,28 @@ export default function Home() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [showReveal, setShowReveal] = useState(false);
   const [revealData, setRevealData] = useState<{ mainNumber: number; cardName: string } | null>(null);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const monthRef = useRef<HTMLInputElement>(null);
   const dayRef = useRef<HTMLInputElement>(null);
 
   const recordClickMutation = trpc.shares.recordClick.useMutation();
+
+  // Fetch stats.json on mount
+  useEffect(() => {
+    fetch("/stats.json")
+      .then(r => r.json())
+      .then((data: { totalUsers?: number }) => {
+        if (typeof data.totalUsers === "number") {
+          setTotalUsers(data.totalUsers);
+        }
+      })
+      .catch(() => {
+        // Fallback to default if stats.json not available
+        setTotalUsers(12847);
+      });
+  }, []);
 
   // ─── Handle ?ref= param: store invite code & record click ────────
   useEffect(() => {
@@ -199,6 +245,9 @@ export default function Home() {
     [isValid, handleCalculate]
   );
 
+  // Animated counter for totalUsers
+  const animatedTotal = useAnimatedCounter(totalUsers);
+
   // Shared input class
   const inputBaseClass =
     "w-full bg-input border rounded-lg px-3 py-3 sm:py-3.5 text-center text-sm sm:text-base text-foreground font-cinzel tracking-wider focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all placeholder:text-muted-foreground/40 placeholder:font-sans-tc placeholder:tracking-normal";
@@ -215,7 +264,9 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/30 bg-gold/5 mb-6">
             <Sparkles className="w-3.5 h-3.5 text-gold" />
             <span className="text-xs sm:text-sm text-gold/80 font-sans-tc">
-              基於陳彩綺塔羅靈數系統 · 已為 12,847 人解讀
+              基於陳彩綺塔羅靈數系統 · 已為{" "}
+              <span className="font-semibold tabular-nums">{animatedTotal}</span>
+              {" "}人解讀
             </span>
           </div>
 
@@ -343,27 +394,30 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Calculate Button */}
-            <Button
-              onClick={handleCalculate}
-              disabled={!isValid || isCalculating}
-              className="w-[90%] sm:w-full mx-auto block py-4 sm:py-5 text-base sm:text-lg font-serif-tc bg-gold hover:bg-gold-light text-midnight font-semibold rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed animate-glow-pulse"
-            >
-              {isCalculating ? (
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 animate-spin" />
-                  解讀命運中...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" />
-                  開始解讀命運
-                </span>
-              )}
-            </Button>
+            {/* Calculate Button — centered wrapper */}
+            <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+              <Button
+                onClick={handleCalculate}
+                disabled={!isValid || isCalculating}
+                style={{ width: "90%", maxWidth: "360px", margin: "0 auto" }}
+                className="py-4 sm:py-5 text-base sm:text-lg font-serif-tc bg-gold hover:bg-gold-light text-midnight font-semibold rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed animate-glow-pulse"
+              >
+                {isCalculating ? (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 animate-spin" />
+                    解讀命運中...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5" />
+                    ✦ 開始解讀命運 ✦
+                  </span>
+                )}
+              </Button>
+            </div>
 
-            {/* 2026 Year Badge */}
-            <div className="mt-4 text-center">
+            {/* 2026 Year Badge — centered */}
+            <div className="mt-4" style={{ display: "flex", justifyContent: "center", width: "100%" }}>
               <span className="inline-flex items-center gap-1.5 text-xs text-gold/60">
                 <Star className="w-3 h-3" />
                 含 2026 流年特別解析

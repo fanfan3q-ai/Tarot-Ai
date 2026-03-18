@@ -269,7 +269,7 @@ function CourseCTA({ cardName, courseCta }: { cardName: string; courseCta: strin
   );
 }
 
-// ─── Main Result Page ───────────────────────────────────────────────
+//// ─── Main Result Page ───────────────────────────────────────────
 export default function Result() {
   const [, navigate] = useLocation();
   const searchStr = useSearch();
@@ -280,8 +280,23 @@ export default function Result() {
   const [firstCalcAmount, setFirstCalcAmount] = useState(0);
   const { claimFirstCalc, isFirstCalc } = usePoints();
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [todayUsers, setTodayUsers] = useState<number | null>(null);
 
   const claimInviteBonusMutation = trpc.shares.claimInviteBonus.useMutation();
+
+  // Fetch stats.json on mount
+  useEffect(() => {
+    fetch("/stats.json")
+      .then(r => r.json())
+      .then((data: { todayUsers?: number }) => {
+        if (typeof data.todayUsers === "number") {
+          setTodayUsers(data.todayUsers);
+        }
+      })
+      .catch(() => {
+        // Silently fail — today stats are optional
+      });
+  }, []);
 
   // Parse query params
   const params = useMemo(() => {
@@ -446,6 +461,13 @@ export default function Result() {
               你的靈數密碼
             </h2>
           </div>
+
+          {/* Today users stats line */}
+          {todayUsers !== null && (
+            <p className="text-center" style={{ fontSize: "0.8rem", color: "var(--gold-warm, #c8952a)" }}>
+              ✦ 今日已有 {todayUsers.toLocaleString("en-US")} 人完成解讀 ✦
+            </p>
+          )}
 
           {/* Three Number Cards — horizontal scroll on mobile */}
           <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 snap-x snap-mandatory sm:grid sm:grid-cols-3 sm:overflow-visible">

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>塔羅靈數 — 管理後台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --midnight: #070d1e;
+      --midnight-light: #0d1530;
+      --gold: #c8952a;
+      --gold-light: #f5d98a;
+      --silver: #b8c8e8;
+      --border: rgba(200, 149, 42, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--midnight);
+      color: var(--silver);
+      font-family: 'Cinzel', serif;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    /* Starfield background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(200, 149, 42, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(100, 80, 200, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      color: rgba(200, 149, 42, 0.5);
+      margin-bottom: 12px;
+    }
+
+    .header-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f5d98a, #c8952a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .header-subtitle {
+      font-size: 0.75rem;
+      color: rgba(184, 200, 232, 0.5);
+      letter-spacing: 0.1em;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: rgba(13, 21, 48, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(200, 149, 42, 0.35);
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: rgba(184, 200, 232, 0.5);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.05em;
+      line-height: 1;
+    }
+
+    .stat-value.small {
+      font-size: 0.9rem;
+      color: var(--silver);
+      letter-spacing: 0.05em;
+    }
+
+    /* Status bar */
+    .status-bar {
+      background: rgba(13, 21, 48, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      margin-right: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-dot.error {
+      background: #f87171;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .status-text {
+      font-size: 0.75rem;
+      color: rgba(184, 200, 232, 0.7);
+    }
+
+    .refresh-btn {
+      background: rgba(200, 149, 42, 0.1);
+      border: 1px solid rgba(200, 149, 42, 0.3);
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(200, 149, 42, 0.2);
+      border-color: rgba(200, 149, 42, 0.5);
+    }
+
+    /* Error state */
+    .error-msg {
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      color: #fca5a5;
+      font-size: 0.8rem;
+      margin-bottom: 16px;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, rgba(200,149,42,0.05) 25%, rgba(200,149,42,0.12) 50%, rgba(200,149,42,0.05) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+      height: 2rem;
+      width: 80%;
+      margin: 0 auto;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Divider */
+    .divider {
+      text-align: center;
+      color: rgba(200, 149, 42, 0.3);
+      letter-spacing: 0.3em;
+      font-size: 0.7rem;
+      margin: 24px 0;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.65rem;
+      color: rgba(184, 200, 232, 0.3);
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <p class="header-eyebrow">TAROT NUMEROLOGY SYSTEM</p>
+      <h1 class="header-title">管理後台</h1>
+      <p class="header-subtitle">即時數據儀表板 · 塔羅靈數</p>
+    </div>
+
+    <div id="error-container"></div>
+
+    <div class="stats-grid" id="stats-grid">
+      <!-- Today Users -->
+      <div class="stat-card">
+        <div class="stat-icon">☽</div>
+        <div class="stat-label">今日訪客</div>
+        <div class="stat-value" id="today-users"><div class="skeleton"></div></div>
+      </div>
+
+      <!-- Week Users -->
+      <div class="stat-card">
+        <div class="stat-icon">◈</div>
+        <div class="stat-label">本週訪客</div>
+        <div class="stat-value" id="week-users"><div class="skeleton"></div></div>
+      </div>
+
+      <!-- Total Users -->
+      <div class="stat-card">
+        <div class="stat-icon">✦</div>
+        <div class="stat-label">累計總訪客</div>
+        <div class="stat-value" id="total-users"><div class="skeleton"></div></div>
+      </div>
+
+      <!-- Last Updated -->
+      <div class="stat-card">
+        <div class="stat-icon">⊙</div>
+        <div class="stat-label">最後更新</div>
+        <div class="stat-value small" id="updated-at"><div class="skeleton"></div></div>
+      </div>
+    </div>
+
+    <div class="divider">──── ✦ ✦ ✦ ────</div>
+
+    <div class="status-bar">
+      <div>
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-text" id="status-text">正在讀取 /stats.json ...</span>
+      </div>
+      <button class="refresh-btn" onclick="loadStats()">↻ 重新整理</button>
+    </div>
+
+    <div class="footer">
+      <p>© 2026 Tarot Numerology · 管理後台 · 資料來源：/stats.json</p>
+    </div>
+  </div>
+
+  <script>
+    function formatNumber(n) {
+      if (typeof n !== 'number') return '—';
+      return n.toLocaleString('en-US');
+    }
+
+    function formatDate(str) {
+      if (!str) return '—';
+      try {
+        const d = new Date(str);
+        if (isNaN(d.getTime())) return str;
+        return d.toLocaleString('zh-TW', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        });
+      } catch {
+        return str;
+      }
+    }
+
+    function setEl(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function loadStats() {
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      const errorContainer = document.getElementById('error-container');
+
+      // Reset to loading state
+      statusText.textContent = '正在讀取 /stats.json ...';
+      if (statusDot) statusDot.className = 'status-dot';
+      errorContainer.innerHTML = '';
+
+      ['today-users', 'week-users', 'total-users', 'updated-at'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="skeleton"></div>';
+      });
+
+      fetch('/stats.json?t=' + Date.now())
+        .then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(data => {
+          setEl('today-users', formatNumber(data.todayUsers));
+          setEl('week-users', formatNumber(data.weekUsers));
+          setEl('total-users', formatNumber(data.totalUsers));
+          setEl('updated-at', formatDate(data.updatedAt));
+
+          if (statusDot) statusDot.className = 'status-dot';
+          statusText.textContent = '資料讀取成功 · 上次更新：' + new Date().toLocaleTimeString('zh-TW');
+        })
+        .catch(err => {
+          if (statusDot) statusDot.className = 'status-dot error';
+          statusText.textContent = '讀取失敗：' + err.message;
+
+          errorContainer.innerHTML = `
+            <div class="error-msg">
+              ⚠ 無法讀取 /stats.json<br/>
+              <small style="opacity:0.7; margin-top:6px; display:block;">
+                請確認 stats.json 已部署到網站根目錄，格式如下：<br/>
+                { "todayUsers": 42, "weekUsers": 312, "totalUsers": 12849, "updatedAt": "2026-03-19T08:00:00Z" }
+              </small>
+            </div>
+          `;
+
+          // Show placeholder dashes
+          setEl('today-users', '—');
+          setEl('week-users', '—');
+          setEl('total-users', '—');
+          setEl('updated-at', '—');
+        });
+    }
+
+    // Load on page open
+    loadStats();
+
+    // Auto-refresh every 5 minutes
+    setInterval(loadStats, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
